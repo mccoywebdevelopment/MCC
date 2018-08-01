@@ -1,0 +1,879 @@
+;Christopher McCoy, this program is an example how to manipulate matrices in scheme.
+;===================================================================== CONNECT 4 GAME VARIABLES =======================================================================================================(define CMMGame'(
+
+(define CMMGame'("X"
+        ( "" "" "" "" "" "" "") ;Need to count (car matrix)
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        )
+)
+
+;================================================================================ Phase I ===================================================================================================
+;(define x'((1 2 3 4 5 6 7 )(8 9 10 11 12 13 14)(15 16 17 18 19 20 21 )(22 23 24 25 5 6 7 )(1 2 3 4 5 6 7)(1 2 3 4 5 6 7 )))
+
+(define (CMMgetColumn Matrix Column)
+  (if (> Column 1)
+      (CMMgetColumn (cdr Matrix) (- Column 1))
+      (if(null? Matrix)
+         ""
+         (if(null? (car Matrix))
+            ""
+            (car Matrix)
+        )
+         
+      )
+  )
+ )
+(define (CMMgetCell Matrix Row Column)
+  (if(null? Matrix)
+     ""
+     (if (> Row 1)
+       (CMMgetCell (cdr Matrix) (- Row 1) Column)
+       (if(null? Matrix)
+          ""
+          (if(null? (car Matrix))
+             ""
+             (CMMgetColumn (car Matrix) Column)
+          )
+       )
+  )
+ )
+)
+
+(define (CMMsetCell Matrix Row Column Item)
+  (if (> Row 1)
+      (cons
+       (car Matrix)
+       (CMMsetCell (cdr Matrix) (- Row 1) Column Item))
+      
+      (cons
+       (CMMsetColumn (car Matrix) Column Item)
+      (cdr Matrix))
+  )
+)
+(define (CMMsetColumn Matrix Column Item)
+  (if (> Column 1)
+      (cons
+       (car Matrix)
+       (CMMsetColumn (cdr Matrix) (- Column 1) Item))
+      
+      (cons Item (cdr Matrix))
+  )
+)
+;====================================================================== Helper Functions ====================================================================================================
+(define x'(("X" "" "" "O" "")("O" 22 23 24 25 26 )(31 32 33 34 35 36 )))
+(define(CMMisFull? Matrix col)
+  (if(> col 1)
+     (CMMisFull? (cdr Matrix) (- col 1))
+     (CMMcompare (car Matrix))
+  )
+) 
+(define(CMMcompare matrix)
+  (if(or (string=? matrix "X")
+         (string=? matrix "O" ) )
+     #t
+     #f
+  )
+  
+)
+(define(CMMScanRow matrix col)
+  (if(> col 1)
+     (CMMScanRow (cdr matrix) (- col 1))
+     (CMMcompare (car matrix))
+     
+  )
+)
+
+
+(define(CMMScanCount matrix col)
+  (if(null? matrix)
+     0
+     (if(CMMScanRow (car matrix) col)
+        (+ (CMMScanCount (cdr matrix) col) 1)
+        (CMMScanCount (cdr matrix) col)
+     )
+  )
+)
+
+;(CMMScanCount CMMGame 2)
+
+(define(CMMRowDepth matrix col)
+  (- 7 (CMMScanCount matrix col)) 
+)
+
+
+(define (CMMShowRow row)
+  (if
+    (null? row)
+    (begin (newline))
+    (begin
+      (display (car row))
+      (display " ")
+      (CMMShowRow (cdr row))
+      )))
+ (define (CMMShowBoard board)
+  (if
+    (null? board)
+    (newline)
+    (begin
+      (CMMShowRow (car board))
+      (CMMShowBoard (cdr board))
+   )))
+
+
+(define(CMMScanRow2 matrix col item)
+  (if(> col 1)
+     (CMMScanRow2 (cdr matrix) (- col 1) item)
+     (CMMcompare2 (car matrix) item)
+  )
+)
+
+
+(define(CMMcompare2 matrix item)
+  (if(string=? matrix item)
+     #t
+     #f
+  )
+  
+)
+
+
+(define(CMMWinUpDown? matrix col item num)
+  (if(null? matrix)
+     #f
+     (if(CMMScanRow2 (car matrix) col item)
+        (if(= num 3)
+           #t
+           (CMMWinUpDown? (cdr matrix) col item (+ num 1));True find item
+        )
+        (if(CMMScanRow2 (car matrix) col "")
+           (CMMWinUpDown? (cdr matrix) col item num)
+           #f
+        )
+     
+       
+     )
+  )
+)
+
+;=========================================================================================
+(define(CMMRowCount matrix col)
+  (CMMScanCount matrix col)
+)
+
+
+(define(CMMWinHorizontal matrix row col item)
+  (if(or(and(= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item)
+         (string=? (CMMgetCell matrix row (+ col 3)) item)))
+      #t
+      (if (and (= col 1)
+           (string=? (CMMgetCell matrix row col) item)
+           (string=? (CMMgetCell matrix row (+ col 1)) item)
+           (string=? (CMMgetCell matrix row (+ col 2)) item)
+           (string=? (CMMgetCell matrix row (+ col 3)) item))
+      #t
+      (if (or(and(= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item)
+         (string=? (CMMgetCell matrix row (+ col 3)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item))
+        
+        )
+          #t
+      (if (or(and(= col 4)
+         (string=? (CMMgetCell matrix row col) item);1
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item)
+         (string=? (CMMgetCell matrix row (+ col 3)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item);2
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item);3
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item);4
+         (string=? (CMMgetCell matrix row (- col 3)) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item))
+        
+        )
+          #t
+      (if (or(and(= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 2)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 3)) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item))
+        
+        )
+      #t
+      (if(or(and(= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)
+         (string=? (CMMgetCell matrix row (+ col 1)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix row (- col 3)) item)
+         (string=? (CMMgetCell matrix row (- col 2)) item)
+         (string=? (CMMgetCell matrix row (- col 1)) item)))
+      #t
+      (if (and (= col 7)
+           (string=? (CMMgetCell matrix row col) item)
+           (string=? (CMMgetCell matrix row (- col 3)) item)
+           (string=? (CMMgetCell matrix row (- col 2)) item)
+           (string=? (CMMgetCell matrix row (- col 1)) item))
+      #t
+      #f
+      )
+      ))))))
+  )
+
+
+
+(define(CMMDiagTopRightValid? col row)
+  (if(and (= row 1) (> col 4))
+     #f
+     (if(or (and (= row 2) (= col 6)) (and (= row 2) (= col 6)))
+        #f
+        (if(and (= col 7) (= row 3))
+           #f
+           #t
+        )))
+        
+)
+
+
+
+(define(CMMDiagBottomLeftValid? col row)
+  (if(and (= col 1) (>= row 4))
+     #f
+     (if(and (= 2 col) (>= row 5))
+        #f
+        (if(and (= col 3) (= row 6))
+           #f
+           #t
+        )))
+        
+)
+
+
+
+(define(CMMWinDiagonalL matrix col row item)
+  (if (and (CMMDiagBottomLeftValid? col row) (CMMDiagTopRightValid? col row))
+
+      (if (and (= col 1)
+           (string=? (CMMgetCell matrix row col) item)
+           (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+           (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+           (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+          #t
+      (if(or(and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        )
+        #t
+     (if(or(and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        )
+        #t
+        (if(or(and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (- col 3)) item))
+        )
+         #t
+        (if(or(and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (- col 3)) item))
+        )
+           #t
+       (if(or(and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (- col 3)) item))
+        )
+           #t
+       (if(or(and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (- col 3)) item))
+        )
+           #t
+           #f
+         
+          
+      )))))))
+      #f
+  )
+)
+
+
+
+
+(define(CMMDiagRTopLeftValid? col row)
+  (if(and (= col 1) (< row 4))
+     #f
+     (if(or (and (= col 2) (= row 1)) (and (= col 2) (= row 2)))
+        #f
+        (if(and (= col 3) (= row 1))
+           #f
+           #t
+        )))
+        
+)
+
+
+
+(define(CMMDiagRBottomRightValid? col row)
+  (if(and (= col 5) (= row 6))
+     #f
+     (if(or(and (= 6 col) (= row 5)) (and (= 6 col) (= row 6)) )
+        #f
+        (if(and (= col 7) (> row 3))
+           #f
+           #t
+        )))
+        
+)
+
+
+(define(CMMWinDiagonalR matrix col row item)
+   (if (and (CMMDiagRTopLeftValid? col row) (CMMDiagRBottomRightValid? col row))
+       (if(or(and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 1)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+          
+         (if(or(and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 2)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+
+         (if(or(and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 3)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+        (if(or(and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 4)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+
+        (if(or(and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 5)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+          
+        (if(or(and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 6)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+          
+        (if(or(and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (+ col 3)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (+ col 2)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (+ row 1) (- col 1)) item)
+         (string=? (CMMgetCell matrix (+ row 2) (- col 2)) item)
+         (string=? (CMMgetCell matrix (+ row 3) (- col 3)) item))
+        (and (= col 7)
+         (string=? (CMMgetCell matrix row col) item)
+         (string=? (CMMgetCell matrix (- row 1) (+ col 1)) item)
+         (string=? (CMMgetCell matrix (- row 2) (+ col 2)) item)
+         (string=? (CMMgetCell matrix (- row 3) (+ col 3)) item)))
+          #t
+          #f
+       )))))))
+       #f
+      )
+  
+)
+
+
+;===================================================================== CONNECT 4 GAME FUNCTIONS ==============================================================================================
+
+(define(CMMStartGame)
+  (begin
+  (set! CMMGame'("X"
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" "")
+        ( "" "" "" "" "" "" ""))
+                               
+   )
+  (display "Human: What do we want!? Computer: Natural language processing! Human: When do we want it!? Computer: When do we want what?\n")       
+  #t
+  )
+)
+
+(define(CMMLegalMoveP col)
+  (if (CMMisFull? (car (cdr CMMGame)) col)
+      #f
+      #t
+  )
+  
+)
+;(CMMLegalMoveP 2)
+
+(define(CMMScanRow matrix col)
+  (if(> col 1)
+     (CMMScanRow (cdr matrix) (- col 1))
+     (CMMcompare (car matrix))
+     
+  )
+)
+
+
+(define(CMMScanCount matrix col)
+  (if(null? matrix)
+     0
+     (if(CMMScanRow (car matrix) col)
+        (+ (CMMScanCount (cdr matrix) col) 1)
+        (CMMScanCount (cdr matrix) col)
+     )
+  )
+)
+
+
+(define(CMMMove matrix col num item)
+     (if(> num 1)
+         (cons (car matrix) (CMMMove (cdr matrix) col (- num 1) item))
+     
+          (cons (CMMsetColumn (car matrix) col item) (cdr matrix))
+     )
+ 
+  
+)
+   
+;THIS IS INSIDE MAKE MOVE.
+(define(CMMValidMoveFinal matrix col item)
+  (if (CMMLegalMoveP col)
+      col
+      (CMMValidMoveFinal matrix (random 7) item)         
+  )
+)
+(define(CMMPlayerMove col)
+  (CMMMove (cdr CMMGame) col (- 6 (CMMScanCount (cdr CMMGame) col)) (car CMMGame))
+)
+
+;(CMMValidMoveFinal (cdr CMMGame) 1 "X")
+
+(define(CMMMakeMove)
+     (CMMMarkMove (CMMValidMoveFinal (cdr CMMGame) (random 7) (car CMMGame)))
+)
+   
+
+(define(CMMMarkMove col)
+  (begin
+    (set! CMMGame
+      (if(string=? "X" (car CMMGame))
+         (cons "O" (CMMPlayerMove col))          ;DOES this actually replace?
+         (cons "X" (CMMPlayerMove col))                     ;I need to replace again!
+      )
+    )
+    col
+  )
+)
+
+
+;(CMMMove CMMGame 1 (- 6 (CMMScanCount CMMGame 1)) "X")
+
+
+(define(CMMShowGame)
+  (begin
+    
+    (CMMShowBoard (cdr CMMGame))
+  )
+)
+;(CMMShowGame)
+
+
+
+
+
+
+(define(CMMWinP col)
+  (if(and (> col 0) (< col 8))
+     (if(CMMWinHorizontal (cdr CMMGame) (CMMRowDepth (cdr CMMGame) col) col (CMMgetCell (cdr CMMGame) (CMMRowDepth (cdr CMMGame) col) col))
+         #t
+         (if(CMMWinUpDown? (cdr CMMGame) col (CMMgetCell (cdr CMMGame) (CMMRowDepth (cdr CMMGame) col) col) 0)
+            #t
+            (if(CMMWinDiagonalR (cdr CMMGame) col (CMMRowDepth (cdr CMMGame) col) (CMMgetCell (cdr CMMGame) (CMMRowDepth (cdr CMMGame) col) col)) ;FIXX RowDEPth it's 6 when col=6
+               #t
+               (if(CMMWinDiagonalL (cdr CMMGame) col (CMMRowDepth (cdr CMMGame) col) (CMMgetCell (cdr CMMGame) (CMMRowDepth (cdr CMMGame) col) col))
+                  #t
+                  #f
+               ))))
+     #f
+  )
+)
+
+
+#|
+(CMMStartGame)
+(CMMMarkMove 1)
+(CMMMarkMove 2)
+(CMMShowGame)
+(CMMWinP 1)
+|#
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1523929888 source:c:\users\asus\desktop\programs\mcc\csc230\lander\lander2.0\main.cpp
+	<iostream>
+	<math.h>
+	<stdio.h>
+

@@ -1,0 +1,142 @@
+;Christopher McCoy, this program is design to manipulate a Bag of Strings.
+(define x'(("a" . 1)("b" . 3)("c" . 1)))
+(define z'(("a" . 2)("b" . 1)("c" . 10)))
+;  '("a" . 2)
+(define (getValue pair)
+  (car pair)
+)
+; (getValue '("a" . 2))
+(define(getCount pair)
+  (cdr pair)
+)
+;  (getCount '("a" . 2))
+(define (newPair item)
+  (cons item 1) )
+;  (newPair "c" 3)
+(define(incPair pair)
+  (cons (car pair) (+ 1 (cdr pair)))
+)
+;   (incPair '("c" . 5))
+(define(decPair pair)
+  (cons (car pair) (- (cdr pair) 1))
+)
+
+(define(insertBag bag item)
+  (if (null? bag)
+      (cons (newPair item) '())
+      (if (string=?
+           (getValue (car bag))
+           item)
+          (cons 
+           (cons (getValue (car bag))(+ 1(getCount (car bag)))) (cdr bag))
+          (cons (car bag)
+                (insertBag (cdr bag) item))    
+      )
+  )
+  
+)
+  
+;(insertBag x "a")
+
+(define (getBagCount bag item)
+  (if (not (null? bag))
+    (if
+      (string=?
+        (getValue (car bag))
+        item)
+      (getCount (car bag))
+      (getBagCount
+        (cdr bag)
+        item))
+    0))
+;(getBagCount x "c")
+(define (deleteAllBag bag item)
+  (if (not (null? bag))
+    (if
+      (string=?
+        (getValue (car bag))
+        item)
+      (cdr bag)
+      (cons
+        (car bag)
+        (deleteAllBag
+          (cdr bag)
+          item)))
+    '()))
+;(deleteAllBag x "a")
+(define (deleteBag bag item)
+  (if (not (null? bag))
+    (if
+      (>
+        (getBagCount bag item)
+        1)
+      (if
+        (string=?
+          (getValue (car bag))
+          item)
+        (cons
+          (cons
+            (getValue (car bag))
+            (-
+              (getCount (car bag))
+              1))
+          (cdr bag))
+        (cons
+          (car bag)
+          (deleteBag
+            (cdr bag)
+            item)))
+      (deleteAllBag
+        bag
+        item))
+    '()))
+
+;(deleteBag x "a")
+(define (intersectBag bagA bagB)
+  (if (and
+        (not (null? bagA))
+        (not (null? bagB)))
+    (cons
+      (cons
+        (getValue (car bagA))
+        (minimum
+          (getBagCount
+            bagA
+            (getValue (car bagA)))
+          (getBagCount
+            bagB
+            (getValue (car bagA)))))
+      (intersectBag
+        (cdr bagA)
+        (cdr bagB)))
+    '()))
+;(intersectBag x z)
+(define (minimum a b)
+  (if (< a b)
+    a
+    b))
+
+(define (unionBag bagA bagB)
+  (cond
+    ((not (null? bagA))
+     (cons
+       (cons
+         (getValue (car bagA))
+         (+
+           (getCount (car bagA))
+           (getBagCount
+             bagB
+             (getValue (car bagA)))))
+       (unionBag
+         (cdr bagA)
+         (deleteAllBag
+           bagB
+           (getValue (car bagA))))))
+    ((not (null? bagB))
+     bagB)
+    (#t
+     '())))
+
+;(unionBag z x)
+
+    

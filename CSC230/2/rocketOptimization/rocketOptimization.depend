@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1523637451 source:c:\users\asus\desktop\programs\mcc\csc230\lander\rocketoptimization\main.cpp
+	<iostream>
+	<math.h>
+	<stdio.h>
+

@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1522886634 source:c:\users\asus\desktop\programs\mcc\csc230\lander\codeblocks\rocket\main.cpp
+	<iostream>
+	<math.h>
+

@@ -1,0 +1,54 @@
+;Christopher McCoy, this program is example of how to use cond and if statements in scheme.
+
+( define (waterWeight diameter length pureWater)
+   (if pureWater
+       ( * 3.14159 (/ diameter 24) length 62.4)
+       ( * 3.14159 (/ diameter 24) length 64.08)
+   )
+)
+(define (convK MHz)
+  (* MHz 1000)
+ )
+
+(define (radio frequency)
+  (cond ((<= (convK frequency) 30) 
+        "VLF")
+        ((<= (convK frequency) 300)
+        "LF")
+        ((<= frequency 3)
+        "MF")
+        ((<= frequency 30)
+        "HF")
+        ((<= frequency 328.6)
+        "VHF")
+        ((<= frequency 2009)
+        "UHF")  
+  )
+)
+(define (divide x)
+  (/ x 100)
+)
+(define (payCheck hourly quantity rate fund)
+  (if hourly
+      (if (< 40 quantity)
+          (- (hourlyW/40+ quantity rate) fund) 
+          (-(* quantity rate) fund)
+      )
+      
+  
+      (cond ( (< 10000 quantity)
+             (- (* quantity (divide 6)) fund) )
+            ( (<= 1000 quantity)
+             (- (* quantity (divide 2.5)) fund))
+            ((< quantity 1000)
+             (- (* (divide 1) quantity) fund))
+             
+      )
+  )
+)
+
+
+(define (hourlyW/40+ num rate)
+  
+  (+ (* (- num 40) 1.5 rate) (* rate 40) )
+)

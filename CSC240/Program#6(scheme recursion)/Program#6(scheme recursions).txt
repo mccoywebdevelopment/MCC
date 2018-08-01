@@ -1,0 +1,26 @@
+;Christopher McCoy, this program demonstrates how to loop in scheme by using recursion.
+(define (seq initial difference num)
+  (if (> num 0)
+     (+ difference (seq initial difference (- num 1)))
+      initial
+  )   
+)
+
+;(seq 2 2 5)
+(define (power base x)
+  (if (> x 0)
+      (if (even? x)
+          (square (power base (/ x 2) ))
+          (* base (square (power  base (/ (- x 1) 2) ))  )
+      )
+      1
+  )
+  
+  
+  
+)
+
+(define(square x)
+  (* x x)
+)
+; (power 2 2)

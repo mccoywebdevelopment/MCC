@@ -1,0 +1,11 @@
+;Christopher McCoy, this program shows how to access each item from a list in scheme.
+(define  x'((("a" "b" "c") "d" ("e" "f")) "g" ((("h") "i"))))
+(car(car(car x)))
+(car(cdr(car(car x))))
+(car(cdr(cdr(car(car x)))))
+(car(cdr(car x)))
+(car(car(cdr(cdr(car x)))))
+(car(cdr(car(cdr(cdr(car x))))))
+(car(cdr x))
+(car(car(car(car(cdr(cdr x))))))
+(car(cdr(car(car(cdr(cdr x))))))

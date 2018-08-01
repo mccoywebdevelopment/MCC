@@ -1,0 +1,73 @@
+#include <iostream>
+void intro();
+char* userInput();
+int findCharacter(char input[],char key);
+using namespace std;
+/*Christopher McCoy, this program is designed to read a line of code and then count
+how many times a user-specified character appears in the text.*/
+int main()
+{
+    char key;
+    char *input;
+    int counter;
+    intro();
+    input=userInput();
+    cout<<endl<<"Please enter a character you want to count how many times it appears "<<endl;
+    cout<<"in the line of text you entered."<<endl;
+    cin>>key;
+    counter=findCharacter(input,key);
+    cout<<"The character '"<<key<<"' appears "<<counter<<" times."<<endl;
+
+}
+void intro()
+{
+    cout<<"This program is designed to read a line of code and then count how "<<endl;
+    cout<<"many times a user-specified character appears in the text."<<endl;
+    cout << "Please enter a line of text you want to test on." << endl;
+
+}
+char* userInput()
+{
+    //int *c = new int[5];
+    char c;
+    char *input = new char[81];
+    c=cin.get();
+    int x=0;
+    while(c!='\n')
+    {
+        if(c!= ' ' && c!= '\t')
+        {
+            input[x]=c;
+            x=x+1;
+            c=cin.get();
+        }
+        else{
+            c=cin.get();
+        }
+
+    }
+    input[x]='\0';
+
+    int ix=0;
+    while(input[ix] !='\0')
+    {
+        cout<<input[ix];
+        ix=ix+1;
+    }
+    return input;
+}
+int findCharacter(char input[],char key)
+{
+    int counter=0;
+    int x=0;
+    while(input[x]!='\0')
+    {
+        if(input[x]==key)
+        {
+            ++counter;
+        }
+        ++x;
+    }
+    return counter;
+}
+

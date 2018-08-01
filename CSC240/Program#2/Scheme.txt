@@ -1,0 +1,6 @@
+;Christopher McCoy, this program demonstrates preorder notation of equations.
+( * 100(expt (+ 1 .09) 20))
+(- (* (/ 100 .0075) (- (expt (+ 1 .0075) (+ 36 1)) 1) ) 100)
+(/ (* 5000 .015)(- 1 (expt (+ 1 .015) ( - 60 ))))
+(/ (* 2000 .005)(- (expt ( + 1 .005) 11) 1))
+(* (expt (+ 1 .01) ( - 4 )) 100000)

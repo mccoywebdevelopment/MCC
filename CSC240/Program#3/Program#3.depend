@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1504296228 source:c:\users\asus\desktop\programs\csc 240\program#3\main.cpp
+	<iostream>
+	<math.h>
+
